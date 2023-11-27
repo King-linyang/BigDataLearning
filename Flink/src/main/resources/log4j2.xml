@@ -1,46 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="error" monitorInterval="30">
-    <!-- 输出格式 -->
-    <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} - [%t] %-5level %logger{36} - %msg%n"/>
-
-    <Appenders>
-        <!-- 控制台输出 -->
+<!--status:Log4j2内部日志的输出级别,设置为TRACE对学习Log4j2非常有用 -->
+<!--monitorInterval:定时检测配置文件的修改,有变化则自动重新加载配置,时间单位为秒,最小间隔为5s -->
+<configuration status="WARN" monitorInterval="600">
+    <!--properties:设置全局变量 -->
+    <properties>
+        <!--LOG_HOME:指定当前日志存放的目录 -->
+        <property name="LOG_HOME">logs</property>
+        <!--FILE_NAME:指定日志文件的名称 -->
+        <property name="FILE_NAME">test</property>
+    </properties>
+    <!-- 先定义所有的appender -->
+    <appenders>
+        <!--这个输出控制台的配置 -->
         <Console name="Console" target="SYSTEM_OUT">
-            <!-- 过滤器 -->
-            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
-            <!-- 缓冲bufferSize，默认值为256，可调整至1-256之间 -->
-            <Buffered mode="ONCE" bufferSize="256"/>
+            <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch） -->
+            <ThresholdFilter level="trace" onMatch="ACCEPT" onMismatch="DENY"/>
+            <!--输出日志的格式 -->
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %class{36} %L %M - %msg%xEx%n"/>
         </Console>
-
-        <!-- 文件输出 -->
-<!--        <RollingFile name="RollingFile" fileName="/path/to/logs/test.log"-->
-<!--                     filePattern="/path/to/logs/$${date:yyyy-MM}/test-%d{yyyy-MM-dd}-%i.log">-->
-<!--            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>-->
-<!--            &lt;!&ndash; 输出格式 &ndash;&gt;-->
-<!--            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>-->
-<!--            &lt;!&ndash; 触发策略 &ndash;&gt;-->
-<!--            <Policies>-->
-<!--                &lt;!&ndash; 按时间滚动 &ndash;&gt;-->
-<!--                <TimeBasedTriggeringPolicy/>-->
-<!--                &lt;!&ndash; 按文件大小滚动，这里设置10MB &ndash;&gt;-->
-<!--                <SizeBasedTriggeringPolicy size="10MB"/>-->
-<!--            </Policies>-->
-<!--            &lt;!&ndash; 滚动策略 &ndash;&gt;-->
-<!--            <DefaultRolloverStrategy max="10"/>-->
-<!--        </RollingFile>-->
-    </Appenders>
-
-    <Loggers>
-        <!-- 默认日志 -->
-        <Root level="INFO">
-            <AppenderRef ref="Console"/>
-<!--            <AppenderRef ref="RollingFile"/>-->
-        </Root>
-
-        <!-- 指定包名的日志 -->
-        <Logger name="com.example" level="DEBUG" additivity="false">
-            <AppenderRef ref="Console"/>
-<!--            <AppenderRef ref="RollingFile"/>-->
-        </Logger>
-    </Loggers>
-</Configuration>
+        <!--文件会打印出所有信息，这个log每次运行程序会自动清空，由append属性决定，这个也挺有用的，适合临时测试用 -->
+        <!--   append为TRUE表示消息增加到指定文件中，false表示消息覆盖指定的文件内容，默认值是true -->
+        <!--        <File name="log" fileName="log/test.log" append="false">-->
+        <!--            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %class{36} %L %M - %msg%xEx%n"/>-->
+        <!--        </File>-->
+        <!--   添加过滤器ThresholdFilter,可以有选择的输出某个级别以上的类别 onMatch="ACCEPT" onMismatch="DENY"意思是匹配就接受,否则直接拒绝 -->
+        <File name="ERROR" fileName="${LOG_HOME}/error.log">
+            <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy.MM.dd 'at' HH:mm:ss z} %-5level %class{36} %L %M - %msg%xEx%n"/>
+        </File>
+        <!--这个会打印出所有的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档 -->
+        <RollingFile name="RollingFile" fileName="${LOG_HOME}/web.log"
+                     filePattern="${LOG_HOME}/$${date:yyyy-MM}/web-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} %-5level %class{36} %L %M - %msg%xEx%n"/>
+            <SizeBasedTriggeringPolicy size="2MB"/>
+        </RollingFile>
+    </appenders>
+    <!--定义logger，只有定义了logger并引入的appender，appender才会生效 -->
+    <loggers>
+        <!-- 过滤掉spring和mybatis的一些无用的DEBUG信息-->
+        <!--        <logger name="org.springframework" level="INFO"></logger>-->
+        <!--        <logger name="org.mybatis" level="INFO"></logger>-->
+        <!--建立一个默认的root的logger -->
+        <root level="trace">
+            <appender-ref ref="RollingFile"/>
+            <appender-ref ref="Console"/>
+            <appender-ref ref="ERROR"/>
+<!--            <appender-ref ref="log"/>-->
+        </root>
+    </loggers>
+</configuration>
