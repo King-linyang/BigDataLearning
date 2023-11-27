@@ -20,7 +20,7 @@ public class App {
         FlinkJob jobRunner = findJobByClass(jobClass);
         assert jobRunner != null;
         jobRunner.run(properties);
-        System.out.println("Hello World!");
+        log.info("Hello World!");
     }
 
     public static FlinkJob findJobByClass(String jobName) {

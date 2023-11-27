@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--status:Log4j2内部日志的输出级别,设置为TRACE对学习Log4j2非常有用 -->
 <!--monitorInterval:定时检测配置文件的修改,有变化则自动重新加载配置,时间单位为秒,最小间隔为5s -->
-<configuration status="WARN" monitorInterval="600">
+<!--<configuration status="INFO" monitorInterval="600">-->
+<configuration status="INFO">
     <!--properties:设置全局变量 -->
     <properties>
         <!--LOG_HOME:指定当前日志存放的目录 -->
@@ -45,7 +46,7 @@
             <appender-ref ref="RollingFile"/>
             <appender-ref ref="Console"/>
             <appender-ref ref="ERROR"/>
-<!--            <appender-ref ref="log"/>-->
+            <!--            <appender-ref ref="log"/>-->
         </root>
     </loggers>
 </configuration>
